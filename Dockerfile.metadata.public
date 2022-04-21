@@ -1,10 +1,13 @@
 FROM python:3.7-slim as base
 WORKDIR /app
-RUN pip3 install gunicorn
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ gunicorn
 
-RUN apt-get update 
-RUN apt-get upgrade -y
-RUN apt-get install git -y
+#RUN apt-get update 
+#RUN apt-get upgrade -y
+#RUN apt-get install git -y
+RUN sed -i s@/deb.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list
+RUN sed -i s@/security.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list
+RUN apt-get update --fix-missing && apt-get install -y git --fix-missing
 
 COPY ./metadata/ /app
 COPY requirements-dev.txt /app/requirements-dev.txt
@@ -14,8 +17,8 @@ CMD [ "python3", "metadata_service/metadata_wsgi.py" ]
 
 FROM base as oidc-release
 
-RUN  pip3 install -e .&& \
-     pip3 install -e .[oidc]
+RUN  pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ -e .&& \
+     pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ -e .[oidc]
 
 ENV FLASK_APP_MODULE_NAME flaskoidc
 ENV FLASK_APP_CLASS_NAME FlaskOIDC
@@ -29,4 +32,4 @@ ENV SQLALCHEMY_DATABASE_URI sqlite:///sessions.db
 # FLASK_OIDC_CLIENT_SECRET - oidc client secret
 
 FROM base as release
-RUN pip3 install -e .
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ -e .

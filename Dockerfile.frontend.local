@@ -6,6 +6,8 @@ WORKDIR /app/amundsen_application/static
 
 COPY ./frontend/amundsen_application/static/package.json /app/amundsen_application/static/package.json
 COPY ./frontend/amundsen_application/static/package-lock.json /app/amundsen_application/static/package-lock.json
+RUN npm config set registry https://registry.npm.taobao.org
+RUN npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/
 RUN npm install
 
 COPY ./frontend/amundsen_application/static/ /app/amundsen_application/static/
@@ -23,7 +25,7 @@ COPY requirements-common.txt /app/requirements-common.txt
 
 COPY --from=node-stage /app /app
 
-RUN pip3 install -e .
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ -e .
 
 ENTRYPOINT [ "python3" ]
 CMD [ "amundsen_application/wsgi.py" ]

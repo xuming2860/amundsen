@@ -3,6 +3,8 @@ WORKDIR /app/amundsen_application/static
 
 COPY ./frontend/amundsen_application/static/package.json /app/amundsen_application/static/package.json
 COPY ./frontend/amundsen_application/static/package-lock.json /app/amundsen_application/static/package-lock.json
+RUN npm config set registry https://registry.npm.taobao.org
+RUN npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/
 RUN npm install
 
 COPY ./frontend/amundsen_application/static /app/amundsen_application/static
@@ -10,19 +12,19 @@ RUN npm run build
 
 FROM python:3.7-slim as base
 WORKDIR /app
-RUN pip3 install gunicorn
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ gunicorn
 
 COPY --from=node-stage /app /app
 COPY ./frontend /app
 COPY requirements-dev.txt /app/requirements-dev.txt
 COPY requirements-common.txt /app/requirements-common.txt
-RUN pip3 install -e .
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ -e .
 
 CMD [ "python3",  "amundsen_application/wsgi.py" ]
 
 FROM base as oidc-release
 
-RUN pip3 install -e .[oidc]
+RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple/ -e .[oidc]
 ENV FRONTEND_SVC_CONFIG_MODULE_CLASS amundsen_application.oidc_config.OidcConfig
 ENV APP_WRAPPER flaskoidc
 ENV APP_WRAPPER_CLASS FlaskOIDC
